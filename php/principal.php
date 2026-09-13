@@ -137,7 +137,7 @@ if (!isset($_SESSION['nombre_usuario'])) {
     <script src="../js/app.js"></script>
 
     <footer>
-        &copy; 2025 Creada por <a href="https://github.com/alockgoy/juegospendientes" target="_blank">@alockgoy</a>.
+        &copy; 2025 Creada por <a href="https://github.com/aloxvim/juegospendientes" target="_blank">@aloxvim</a>.
     </footer>
 
 </body>
