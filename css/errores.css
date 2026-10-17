@@ -1,37 +1,46 @@
-body {
-    font-family: Arial, sans-serif;
+/*
+ * Páginas de error/aviso que generan los scripts PHP.
+ * El PHP imprime primero el enlace "Volver atrás" y luego el mensaje <p>;
+ * con `order` se muestra el mensaje arriba y el enlace debajo como botón.
+ */
+@import url("./gx-theme.css");
+
+body > p,
+body > .error {
+    order: 1;
+    width: 100%;
+    max-width: 520px;
     margin: 0;
-    padding: 0;
-    background-color: #f4f4f9;
-    color: #333;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    padding: 1rem 1.25rem;
+    color: var(--texto);
+    background: linear-gradient(160deg, var(--panel-2), var(--panel));
+    border: 1px solid rgba(250, 30, 78, 0.4);
+    border-left: 4px solid var(--gx-rojo);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(250, 30, 78, 0.12);
 }
 
-p {
-    padding: 15px;
-    border: 1px solid #d9534f;
-    background-color: #f8d7da;
-    color: #721c24;
-    border-radius: 5px;
-    max-width: 600px;
-    margin: 20px auto;
-    text-align: center;
+body > a {
+    order: 2;
+    padding: 0.7rem 1.5rem;
+    font-family: var(--fuente-titulo);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--gx-rojo-fuerte);
+    clip-path: var(--chaflan);
+    transition: background 0.2s ease, filter 0.2s ease;
 }
 
-a{
-    padding: 15px;
-    text-align: center;
-    margin: 20px;
+body > a:hover {
+    background: var(--gx-rojo);
+    filter: drop-shadow(0 0 10px var(--gx-rojo-brillo));
 }
 
-strong {
-    color: #a94442;
+body > a:focus-visible {
+    clip-path: none;
 }
 
-body > p {
-    display: inline-block;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+body > br {
+    display: none;
 }

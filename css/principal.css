@@ -1,184 +1,164 @@
-/* Estilos generales */
-html,
-body {
-    height: 100%;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
+/*
+ * Lista de juegos pendientes (php/principal.php).
+ * La barra superior viene del tema; aquí va la rejilla de tarjetas.
+ * Cada .contenedor tiene, en orden: .imagen, nombre, puntuación, duración,
+ * .indicador, <br> y el enlace de borrar (de ahí los :nth-child).
+ */
+@import url("./gx-theme.css");
+
+/* ===== Botones de la barra ===== */
+header > nav .anade {
+    color: #fff;
+    background: var(--gx-rojo-fuerte);
+    border-color: var(--gx-rojo-fuerte);
 }
 
-body {
-    font-family: sans-serif;
-    background-color: #f0f0f0;
-    padding-top: 100px;
+header > nav .anade:hover {
+    background: var(--gx-rojo);
+    box-shadow: 0 0 14px var(--gx-rojo-brillo);
 }
 
-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: #333;
-    color: white;
-    padding: 1rem 0;
-    text-align: center;
-    z-index: 1000;
-    box-sizing: border-box; /* Incluye padding en el width */
+header > nav #borrar {
+    color: var(--gx-rojo);
+    background: transparent;
+    border-color: rgba(250, 30, 78, 0.5);
 }
 
-nav {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 10px;
+header > nav #borrar:hover {
+    color: #fff;
+    background: var(--gx-rojo-fuerte);
 }
 
-nav a {
-    color: white;
-    text-decoration: none;
-    padding: 5px 10px;
-    border: 1px solid white;
-    border-radius: 5px;
-    white-space: nowrap;
-}
-
-nav a:hover {
-    background-color: white;
-    color: black;
-}
-
+/* ===== Rejilla de juegos ===== */
 main {
     flex: 1;
-    padding: 20px;
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: clamp(1rem, 3vw, 2rem) clamp(16px, 3vw, 2rem);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    align-items: start;
+    gap: clamp(1rem, 2vw, 1.5rem);
+    background: none;
+    border: 0;
+    box-shadow: none;
 }
 
-.contenedor {
-    display: inline-block;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-    margin-right: 3%;
+main::before,
+main::after {
+    content: none;
 }
 
-.contenedor {
-    /* Contenedor para los datos del juego */
-    border: 1px solid #ddd;
-    /* Borde sutil */
-    padding: 10px;
-    border-radius: 5px;
-    /* Bordes redondeados */
-    text-align: left;
-    /* Alinea el texto a la izquierda */
-    margin-top: 10px;
-    /* Separación de la imagen */
-}
-
-.contenedor a {
-    display: block;
+/* lista vacía */
+main > p {
+    grid-column: 1 / -1;
+    margin: 3rem auto;
+    padding: 2rem;
     text-align: center;
+    border: 1px dashed var(--borde);
+}
+
+/* ===== Tarjeta de juego ===== */
+.contenedor {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--borde);
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.contenedor:hover {
+    transform: translateY(-4px);
+    border-color: var(--gx-rojo);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5), 0 0 22px rgba(250, 30, 78, 0.2);
+}
+
+.imagen {
+    aspect-ratio: 16 / 9;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background: var(--fondo);
+    border-bottom: 2px solid var(--gx-rojo);
+}
+
+.imagen img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.35s ease;
+}
+
+.contenedor:hover .imagen img {
+    transform: scale(1.05);
+}
+
+.imagen p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--texto-suave);
 }
 
 .texto {
-    border: 1px solid #ccc;
-    padding: 10px;
-    text-align: center;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-    background-color: white;
-    border-radius: 8px;
+    padding: 0.15rem 1rem;
+    font-size: 0.9rem;
+    color: var(--texto-suave);
 }
 
+/* nombre del juego */
+.contenedor > .texto:nth-child(2) {
+    padding-top: 0.85rem;
+    padding-bottom: 0.35rem;
+    font-family: var(--fuente-titulo);
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--texto);
+}
+
+/* indicador (puntuación / horas) como chip destacado */
 .indicador {
-    background-color: grey;
-    color: white;
+    align-self: flex-start;
+    margin: 0.75rem 1rem 1rem;
+    padding: 0.3rem 0.75rem;
+    font-family: var(--fuente-titulo);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--gx-rojo);
+    background: var(--gx-rojo-suave);
+    border: 1px solid rgba(250, 30, 78, 0.5);
+    clip-path: var(--chaflan);
 }
 
-.indicador:hover {
-    background-color: white;
-    color: black;
+.contenedor > br {
+    display: none;
 }
 
-img {
-    max-width: 300px;
-    max-height: 300px;
-    display: block;
-    margin: 0 auto 10px;
-    /* Centra la imagen horizontalmente */
-    border-radius: 5px;
+/* enlace "Borrar juego" al pie de la tarjeta */
+.contenedor > a {
+    margin-top: auto;
+    padding: 0.7rem 1rem;
+    font-family: var(--fuente-titulo);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+    border-top: 1px solid var(--borde);
 }
 
-#borrar:hover {
-    background-color: red;
-    color: white;
-}
-
-.anade:hover {
-    background-color: green;
-    color: white;
-}
-
-#modificar:hover {
-    background-color: orange;
-    color: white;
+.contenedor > a:hover {
+    color: #fff;
+    text-shadow: none;
+    background: var(--gx-rojo-fuerte);
 }
 
 footer {
-    position: static; 
-    width: 100%;
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 10px 0;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-}
-
-footer a {
-    color: blue;
-}
-
-/* Estilos responsivos para pantallas pequeñas */
-@media (max-width: 600px) {
-
-    /* Aumentar el padding-top del body para compensar el header más alto */
-    body {
-        padding-top: 220px;
-        /* Aumentado significativamente para mobile */
-    }
-
-    nav {
-        flex-direction: column;
-        /* Cambia a columnas */
-        align-items: center;
-        /* Centra los enlaces */
-        gap: 15px;
-        /* Aumenta la separación entre los elementos */
-    }
-
-    nav a {
-        width: 90%;
-        /* Haz que los enlaces ocupen más espacio en pantalla */
-        text-align: center;
-        padding: 10px;
-        /* Aumenta el padding interno para hacerlos más grandes */
-        margin: 5px 0;
-        /* Agrega margen para evitar que se toquen */
-        text-decoration: underline;
-        border: none;
-    }
-
-    .anade {
-        text-decoration-color: green;
-    }
-
-    #modificar {
-        text-decoration-color: orange;
-    }
-
-    #borrar {
-        text-decoration-color: red;
-    }
-
-    footer {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-    }
+    margin-top: auto;
+    border-top: 1px solid var(--borde);
 }

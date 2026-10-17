@@ -1,0 +1,465 @@
+/*
+ * Tema "GX" — inspirado en el tema rojo por defecto de Opera GX.
+ * Lo importan todos los CSS de página con @import, así que cualquier cambio
+ * de colores, tipografía o componentes se hace aquí una sola vez.
+ */
+
+/* Fuentes: Chakra Petch (títulos/botones, aspecto angular) y Exo 2 (texto) */
+@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Exo+2:wght@400;500;600&display=swap");
+
+/* ===== Variables ===== */
+:root {
+    color-scheme: dark;
+
+    /* rojo GX: el claro para acentos y texto, el fuerte para fondos de botón (contraste con blanco) */
+    --gx-rojo: #fa1e4e;
+    --gx-rojo-fuerte: #d4123a;
+    --gx-rojo-suave: rgba(250, 30, 78, 0.14);
+    --gx-rojo-brillo: rgba(250, 30, 78, 0.45);
+
+    --fondo: #0d0a0e;
+    --panel: #18121a;
+    --panel-2: #221a25;
+    --borde: #3a2732;
+    --texto: #ece4ea;
+    --texto-suave: #a8969f;
+    --ok: #3ddc97;
+
+    --fuente-titulo: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+    --fuente-texto: "Exo 2", "Segoe UI", system-ui, sans-serif;
+
+    /* esquina recortada de botones y chips */
+    --chaflan: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+
+/* ===== Base ===== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    scrollbar-color: var(--gx-rojo-fuerte) var(--fondo);
+}
+
+/* Disposición por defecto: tarjeta centrada (login, registro, formularios, errores) */
+body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 2rem 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+
+    font-family: var(--fuente-texto);
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--texto);
+
+    /* brillos rojos en las esquinas + rejilla sutil */
+    background-color: var(--fondo);
+    background-image:
+        radial-gradient(ellipse 60% 50% at 0% 0%, rgba(250, 30, 78, 0.18), transparent 60%),
+        radial-gradient(ellipse 50% 40% at 100% 100%, rgba(250, 30, 78, 0.12), transparent 60%),
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: auto, auto, 32px 32px, 32px 32px;
+    background-attachment: fixed;
+}
+
+::selection {
+    background: var(--gx-rojo);
+    color: #fff;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--fondo);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gx-rojo-fuerte);
+}
+
+/* ===== Tipografía ===== */
+h1,
+h2,
+h3 {
+    font-family: var(--fuente-titulo);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.15;
+    margin: 0;
+}
+
+/* títulos de página con barrita roja debajo */
+h1,
+h2 {
+    font-size: clamp(1.5rem, 4vw, 2.1rem);
+    text-transform: uppercase;
+    text-align: center;
+}
+
+h1::after,
+body > h2::after,
+body > header > h2::after {
+    content: "";
+    display: block;
+    width: 56px;
+    height: 3px;
+    margin: 0.6rem auto 0;
+    background: var(--gx-rojo);
+    box-shadow: 0 0 12px var(--gx-rojo-brillo);
+}
+
+p {
+    margin: 0 0 1rem;
+}
+
+strong {
+    color: var(--gx-rojo);
+    font-weight: 600;
+}
+
+a {
+    color: var(--gx-rojo);
+    text-decoration: none;
+    transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+a:hover {
+    color: #fff;
+    text-shadow: 0 0 10px var(--gx-rojo-brillo);
+}
+
+:focus-visible {
+    outline: 2px solid var(--gx-rojo);
+    outline-offset: 2px;
+}
+
+/* ===== Panel principal (tarjeta con esquinas tipo HUD) ===== */
+main {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    padding: clamp(1.25rem, 4vw, 2rem);
+    background: linear-gradient(160deg, var(--panel-2), var(--panel) 45%);
+    border: 1px solid var(--borde);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    text-align: left;
+}
+
+main::before,
+main::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--gx-rojo);
+    pointer-events: none;
+}
+
+main::before {
+    top: -1px;
+    left: -1px;
+    border-right: 0;
+    border-bottom: 0;
+}
+
+main::after {
+    bottom: -1px;
+    right: -1px;
+    border-left: 0;
+    border-top: 0;
+}
+
+main > h1 {
+    margin-bottom: 1.5rem;
+}
+
+/* ===== Formularios ===== */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+/* los <br> del HTML se sustituyen por el gap */
+form br {
+    display: none;
+}
+
+label {
+    font-family: var(--fuente-titulo);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+}
+
+form label:not(:first-child) {
+    margin-top: 0.75rem;
+}
+
+label strong {
+    color: var(--texto-suave);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="file"],
+select,
+textarea {
+    width: 100%;
+    padding: 0.7rem 0.85rem;
+    font: inherit;
+    color: var(--texto);
+    background: var(--fondo);
+    border: 1px solid var(--borde);
+    border-left: 3px solid var(--borde);
+    border-radius: 0;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #6e5f68;
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+    border-color: #5a3a48;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--gx-rojo);
+    box-shadow: 0 0 0 3px var(--gx-rojo-suave), 0 0 18px rgba(250, 30, 78, 0.18);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 140px;
+}
+
+/* desplegable con flecha propia en rojo */
+select {
+    appearance: none;
+    padding-right: 2.5rem;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23fa1e4e' stroke-width='2'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center;
+}
+
+option {
+    background: var(--panel);
+    color: var(--texto);
+}
+
+input[type="file"] {
+    padding: 0.45rem;
+    color: var(--texto-suave);
+    cursor: pointer;
+}
+
+input[type="file"]::file-selector-button {
+    margin-right: 0.85rem;
+    padding: 0.45rem 0.9rem;
+    font-family: var(--fuente-titulo);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--texto);
+    background: var(--panel-2);
+    border: 1px solid var(--gx-rojo);
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+    background: var(--gx-rojo-fuerte);
+}
+
+/* ===== Botones ===== */
+button {
+    margin-top: 1.25rem;
+    padding: 0.85rem 1.25rem;
+    font-family: var(--fuente-titulo);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--gx-rojo-fuerte);
+    border: 0;
+    cursor: pointer;
+    clip-path: var(--chaflan);
+    transition: background 0.2s ease, filter 0.2s ease, transform 0.1s ease;
+}
+
+button:hover {
+    background: var(--gx-rojo);
+    filter: drop-shadow(0 0 10px var(--gx-rojo-brillo));
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+/* el clip-path recortaría el outline: al enfocar con teclado se quita el chaflán */
+button:focus-visible {
+    clip-path: none;
+}
+
+/* ===== Enlaces secundarios dentro de formularios ("Volver atrás", "Crear cuenta"...) ===== */
+form section {
+    text-align: center;
+}
+
+form section:first-of-type {
+    margin-top: 1rem;
+}
+
+form section a {
+    display: inline-block;
+    padding: 0.2rem 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--texto-suave);
+}
+
+form section a:hover {
+    color: var(--gx-rojo);
+}
+
+/* ===== Mensajes de error ===== */
+.error {
+    width: 100%;
+    max-width: 440px;
+    margin: 0;
+    padding: 0.9rem 1rem;
+    color: var(--texto);
+    background: rgba(250, 30, 78, 0.1);
+    border: 1px solid rgba(250, 30, 78, 0.4);
+    border-left: 4px solid var(--gx-rojo);
+}
+
+/* ===== Barra superior (páginas cuyo header tiene <nav>: portada y lista) ===== */
+body:has(> header > nav) {
+    padding: 0;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0;
+}
+
+header:has(> nav) {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    padding: 0.85rem clamp(16px, 4vw, 2.5rem);
+    background: rgba(13, 10, 14, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--borde);
+    box-shadow: 0 1px 0 rgba(250, 30, 78, 0.35), 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+header:has(> nav) > h2 {
+    font-size: clamp(1.05rem, 2.6vw, 1.4rem);
+    text-align: left;
+}
+
+header:has(> nav) > h2::after {
+    display: none;
+}
+
+header > nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+header > nav a {
+    display: block;
+    padding: 0.5rem 1rem;
+    font-family: var(--fuente-titulo);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--texto);
+    background: var(--panel);
+    border: 1px solid var(--borde);
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+header > nav a:hover {
+    color: #fff;
+    text-shadow: none;
+    border-color: var(--gx-rojo);
+    background: var(--gx-rojo-suave);
+}
+
+@media (max-width: 640px) {
+    header:has(> nav) {
+        position: static;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    header:has(> nav) > h2 {
+        text-align: center;
+    }
+
+    header > nav {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+
+    header > nav a {
+        text-align: center;
+        white-space: normal;
+    }
+}
+
+/* ===== Pie ===== */
+footer {
+    padding: 1rem 16px;
+    font-size: 0.85rem;
+    text-align: center;
+    color: var(--texto-suave);
+}
+
+/* ===== Accesibilidad: sin animaciones si el usuario lo pide ===== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition: none !important;
+        animation: none !important;
+    }
+}

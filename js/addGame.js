@@ -70,7 +70,7 @@ function mostrarResultados(juegos) {
 
         const img = juego.background_image ?
             `<img src="${juego.background_image}" alt="${juego.name}" />` :
-            '<div style="width: 60px; height: 60px; background: #ddd; border-radius: 4px;"></div>';
+            '<div class="sin-imagen"></div>';
 
         const rating = juego.rating ? (juego.rating * 20).toFixed(0) : 'N/A';
         const playtime = juego.playtime || 'N/A';
@@ -102,6 +102,7 @@ async function seleccionarJuego(juego) {
     // Descargar la imagen del juego
     if (juego.background_image) {
         posterInfo.textContent = 'Descargando imagen...';
+        posterInfo.classList.remove('ok');
         try {
             await descargarImagen(juego.background_image, juego.name);
         } catch (error) {
@@ -158,7 +159,7 @@ async function descargarImagen(url, nombreJuego) {
         inputPoster.files = dataTransfer.files;
 
         posterInfo.textContent = `✓ Imagen cargada: ${data.nombreArchivo} (${Math.round(data.size / 1024)}KB)`;
-        posterInfo.style.color = 'green';
+        posterInfo.classList.add('ok');
 
     } catch (error) {
         throw error;
