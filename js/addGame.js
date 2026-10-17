@@ -1,9 +1,30 @@
 // Configuración de la API de RAWG
-const RAWG_API_KEY = 'TU_API_KEY_AQUI'; // Obtener en: https://rawg.io/apidocs
+// La clave se guarda en sql/config.php ($claveApiRawg) y se pide al servidor
 const RAWG_API_URL = 'https://api.rawg.io/api/games';
 
 let timeoutBusqueda = null;
 let juegoSeleccionado = null;
+let promesaClaveApi = null;
+
+// Función para obtener la clave de la API (solo se pide al servidor una vez)
+function obtenerClaveApi() {
+    if (!promesaClaveApi) {
+        promesaClaveApi = fetch('../php/obtenerClaveApi.php')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('No se pudo obtener la clave de la API');
+                }
+                return response.json();
+            })
+            .then(data => data.claveApiRawg || '')
+            .catch(error => {
+                // permitir reintentar en la siguiente búsqueda
+                promesaClaveApi = null;
+                throw error;
+            });
+    }
+    return promesaClaveApi;
+}
 
 // Elementos del DOM
 const inputBusqueda = document.getElementById('busquedaJuego');
@@ -38,7 +59,14 @@ async function buscarJuegos(query) {
     resultadosDiv.style.display = 'block';
 
     try {
-        const url = `${RAWG_API_URL}?key=${RAWG_API_KEY}&search=${encodeURIComponent(query)}&page_size=5`;
+        const claveApi = await obtenerClaveApi();
+
+        if (!claveApi || claveApi === 'TU_API_KEY_AQUI') {
+            resultadosDiv.innerHTML = '<div class="loading">Búsqueda no disponible: falta configurar la clave de la API de RAWG. Usa el modo manual.</div>';
+            return;
+        }
+
+        const url = `${RAWG_API_URL}?key=${encodeURIComponent(claveApi)}&search=${encodeURIComponent(query)}&page_size=5`;
         const response = await fetch(url);
 
         if (!response.ok) {
