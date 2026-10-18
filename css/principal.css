@@ -53,7 +53,10 @@ main {
     margin: 0 auto;
     padding: clamp(1rem, 3vw, 2rem) clamp(16px, 3vw, 2rem);
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    /* tarjetas de ancho fijo (no crecen aunque sobre espacio) */
+    grid-template-columns: repeat(auto-fill, 260px);
+    /* las filas no se estiran para llenar la pantalla cuando hay pocos juegos */
+    align-content: start;
     align-items: start;
     gap: clamp(1rem, 2vw, 1.5rem);
     background: none;
@@ -93,7 +96,8 @@ main > p {
 }
 
 .imagen {
-    aspect-ratio: 16 / 9;
+    /* algo vertical para que se vean bien las portadas (sin llegar al 2:3 de una carátula) */
+    aspect-ratio: 4 / 5;
     display: grid;
     place-items: center;
     overflow: hidden;
@@ -177,4 +181,11 @@ main > p {
 footer {
     margin-top: auto;
     border-top: 1px solid var(--borde);
+}
+
+/* móvil: si no caben dos tarjetas de 260px, una sola a todo el ancho */
+@media (max-width: 600px) {
+    main {
+        grid-template-columns: 1fr;
+    }
 }
