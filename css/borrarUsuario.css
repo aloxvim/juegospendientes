@@ -1,0 +1,54 @@
+/* Borrar cuenta (php/borrarUsuario.php) */
+@import url("./gx-theme.css");
+
+/* indicador "Paso X de 3" */
+.pasos {
+    margin-bottom: 1rem;
+    font-family: var(--fuente-titulo);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+}
+
+main .error {
+    margin-bottom: 1rem;
+}
+
+form p {
+    margin: 0 0 0.75rem;
+    color: var(--texto-suave);
+}
+
+/* aviso del último paso */
+.aviso-irreversible {
+    padding: 1rem;
+    background: rgba(250, 30, 78, 0.12);
+    border: 1px solid var(--gx-rojo);
+    border-left: 4px solid var(--gx-rojo);
+    box-shadow: 0 0 22px rgba(250, 30, 78, 0.2);
+}
+
+.aviso-irreversible p:first-child {
+    font-family: var(--fuente-titulo);
+    font-size: 1.15rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.aviso-irreversible p:last-child {
+    margin: 0;
+    color: var(--texto);
+}
+
+/* botón final más llamativo */
+button.peligro {
+    background: var(--gx-rojo);
+    box-shadow: none;
+}
+
+button.peligro:hover {
+    background: #ff3d66;
+    filter: drop-shadow(0 0 14px var(--gx-rojo-brillo));
+}

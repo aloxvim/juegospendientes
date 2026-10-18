@@ -1,122 +1,259 @@
+<?php
+// borrarUsuario.php
+// Borrado de cuenta en 3 pasos:
+//   1) pedir la contraseña
+//   2) primera confirmación
+//   3) confirmación final avisando de que es irreversible
+// El paso superado se guarda en la sesión (y caduca), así que no se puede
+// saltar ningún paso enviando el formulario a mano.
+
+//depuración
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
+
+//traer el archivo de conexión
+include_once "./conectar.php";
+
+//comprobar que existe una sesión
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($_SESSION['nombre_usuario'])) {
+    header("Location: ../html/login.html");
+    exit();
+}
+
+//tiempo para completar los pasos, en segundos
+const TIEMPO_BORRADO = 300;
+
+//devuelve el último paso superado (0 si ninguno o si ha caducado)
+function pasoSuperado() {
+    $estado = $_SESSION['borrarCuenta'] ?? null;
+
+    if (!$estado || $estado['expira'] < time()) {
+        unset($_SESSION['borrarCuenta']);
+        return 0;
+    }
+
+    return $estado['paso'];
+}
+
+//guardar en la sesión el paso superado
+function marcarPaso($paso) {
+    $_SESSION['borrarCuenta'] = ['paso' => $paso, 'expira' => time() + TIEMPO_BORRADO];
+}
+
+//comprobar la contraseña del usuario
+function claveCorrecta($conectar, $nombreUsuario, $clave) {
+    $consulta = "SELECT contrasena, salt FROM Usuarios WHERE nombre_usuario = ?;";
+    $prepararConsulta = $conectar->prepare($consulta);
+    $prepararConsulta->bind_param("s", $nombreUsuario);
+    $prepararConsulta->execute();
+    $usuario = $prepararConsulta->get_result()->fetch_assoc();
+
+    if (!$usuario) {
+        return false;
+    }
+
+    $hashedPassword = hash('sha256', $clave . $usuario['salt']);
+    return hash_equals($usuario['contrasena'], $hashedPassword);
+}
+
+//contar los juegos del usuario (para avisar de lo que se va a perder)
+function contarJuegos($conectar, $nombreUsuario) {
+    $consulta = "SELECT COUNT(*) AS total FROM Anade a INNER JOIN Usuarios u ON a.id_usuario = u.id_usuario WHERE u.nombre_usuario = ?;";
+    $prepararConsulta = $conectar->prepare($consulta);
+    $prepararConsulta->bind_param("s", $nombreUsuario);
+    $prepararConsulta->execute();
+    return (int) $prepararConsulta->get_result()->fetch_assoc()['total'];
+}
+
+//borrar el usuario, sus juegos y sus pósters
+function borrarCuenta($conectar, $nombreUsuario) {
+    //obtener el id del usuario
+    $consultaObtenerIdUsuario = "SELECT id_usuario FROM Usuarios WHERE nombre_usuario = ?;";
+    $prepararConsultaUsuario = $conectar->prepare($consultaObtenerIdUsuario);
+    $prepararConsultaUsuario->bind_param("s", $nombreUsuario);
+    $prepararConsultaUsuario->execute();
+    $idUsuario = $prepararConsultaUsuario->get_result()->fetch_assoc()['id_usuario'];
+
+    //obtener los juegos del usuario y sus pósters
+    $consultaJuegos = "SELECT j.id, j.poster FROM Juegos j INNER JOIN Anade a ON j.id = a.id_juego WHERE a.id_usuario = ?;";
+    $stmtJuegos = $conectar->prepare($consultaJuegos);
+    $stmtJuegos->bind_param("i", $idUsuario);
+    $stmtJuegos->execute();
+    $juegos = $stmtJuegos->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmtJuegos->close();
+
+    //borrar todo en una transacción: o se borra todo o no se borra nada
+    $conectar->begin_transaction();
+    try {
+        //eliminar los registros de la tabla 'Anade' asociados con el usuario
+        $stmt = $conectar->prepare("DELETE FROM Anade WHERE id_usuario = ?;");
+        $stmt->bind_param("i", $idUsuario);
+        $stmt->execute();
+        $stmt->close();
+
+        //eliminar los juegos del usuario
+        $stmt = $conectar->prepare("DELETE FROM Juegos WHERE id = ?;");
+        foreach ($juegos as $juego) {
+            $stmt->bind_param("i", $juego['id']);
+            $stmt->execute();
+        }
+        $stmt->close();
+
+        //eliminar el usuario
+        $stmt = $conectar->prepare("DELETE FROM Usuarios WHERE id_usuario = ?;");
+        $stmt->bind_param("i", $idUsuario);
+        $stmt->execute();
+        $stmt->close();
+
+        $conectar->commit();
+    } catch (mysqli_sql_exception $e) {
+        $conectar->rollback();
+        throw $e;
+    }
+
+    //eliminar los archivos de los pósters (solo cuando la BD ya está borrada)
+    foreach ($juegos as $juego) {
+        $rutaPoster = "../img/avatares_juegos/" . basename($juego['poster']);
+        if (is_file($rutaPoster)) {
+            unlink($rutaPoster);
+        }
+    }
+}
+
+$nombreUsuario = $_SESSION['nombre_usuario'];
+$conectar = getConexion();
+
+$pasoMostrar = 1;
+$error = null;
+
+if ($_SERVER['REQUEST_METHOD'] == "POST") {
+    $paso = (int) ($_POST['paso'] ?? 0);
+
+    try {
+        if ($paso === 1) {
+            //paso 1: comprobar la contraseña
+            if (claveCorrecta($conectar, $nombreUsuario, $_POST['clave'] ?? '')) {
+                marcarPaso(1);
+                $pasoMostrar = 2;
+            } else {
+                unset($_SESSION['borrarCuenta']);
+                $error = "La contraseña no es correcta.";
+            }
+        } elseif ($paso === 2 && pasoSuperado() === 1) {
+            //paso 2: primera confirmación
+            marcarPaso(2);
+            $pasoMostrar = 3;
+        } elseif ($paso === 3 && pasoSuperado() === 2) {
+            //paso 3: confirmación final -> borrar
+            borrarCuenta($conectar, $nombreUsuario);
+            $conectar->close();
+
+            //cerrar la sesión del usuario borrado
+            $_SESSION = [];
+            session_destroy();
+
+            redirigir('../index.html');
+        } else {
+            //paso saltado o caducado: volver a empezar
+            unset($_SESSION['borrarCuenta']);
+            $error = "La confirmación ha caducado o no es válida. Vuelve a empezar.";
+        }
+    } catch (mysqli_sql_exception $e) {
+        unset($_SESSION['borrarCuenta']);
+        $pasoMostrar = 1;
+        $error = "Error borrando la cuenta: " . $e->getMessage();
+    }
+} else {
+    //al entrar en la página siempre se empieza desde el principio
+    unset($_SESSION['borrarCuenta']);
+}
+
+$totalJuegos = $pasoMostrar > 1 ? contarJuegos($conectar, $nombreUsuario) : 0;
+$conectar->close();
+?>
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="../css/errores.css">
-    <title></title>
+    <link rel="stylesheet" type="text/css" href="../css/borrarUsuario.css">
+
+    <link rel="icon" href="../img/iconos/icons8-modify-16.png" sizes="any" />
+    <link rel="apple-touch-icon" href="../img/iconos/icons8-modify-16.png" />
+
+    <title>Borrar cuenta</title>
 </head>
 
 <body>
-    <?php
-    //depuración
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
+    <h1>Borrar cuenta</h1>
 
-    //traer el archivo de conexión
-    include_once "./conectar.php";
+    <main>
+        <p class="pasos">Paso <?php echo $pasoMostrar; ?> de 3</p>
 
-    //establecer la conexión
-    $conectar = getConexion();
+        <?php if ($error !== null) { ?>
+            <p class="error"><?php echo htmlspecialchars($error); ?></p>
+        <?php } ?>
 
-    //comprobar que se puede establecer la conexión
-    if (!$conectar) {
-        echo "<a href='../html/login.html'>Volver atrás</a><br/><br/>";
-        die("Error en la conexión a la base de datos");
-    }
+        <?php if ($pasoMostrar === 1) { ?>
+            <!--Paso 1: contraseña-->
+            <form action="./borrarUsuario.php" method="post">
+                <input type="hidden" name="paso" value="1" />
 
-    //comprobar que existe una sesión
-    if (session_status() == PHP_SESSION_NONE) {
-        session_start();
-    }
+                <p>Para borrar la cuenta <strong><?php echo htmlspecialchars($nombreUsuario); ?></strong>, primero confirma que eres tú.</p>
 
-    if (!isset($_SESSION['nombre_usuario'])) {
-        header("Location: ../html/login.html");
-        exit();
-    }
+                <label for="clave">Tu contraseña: </label>
+                <input type="password" name="clave" id="clave" placeholder="Escribe tu contraseña" required autofocus />
 
-    //obtener el nombre de usuario desde la URL
-    $nombre_usuario = $_GET['nombre_usuario'] ?? null;
+                <button type="submit">Continuar</button>
 
-    //comprobar que el nombre de usuario a borrar es el mismo de la sesión
-    if ($nombre_usuario === $_SESSION['nombre_usuario']) {
+                <section>
+                    <a href="./principal.php">Cancelar</a>
+                </section>
+            </form>
 
-        /* Esto es un poco más complejo
-        Hay que eliminar los juegos añadidos por el usuario
-            Eso incluye los registros de la tabla 'Anade' y la tabla 'Juegos'
-        Luego de eso ya sí se puede eliminar el usuario
-        */
+        <?php } elseif ($pasoMostrar === 2) { ?>
+            <!--Paso 2: primera confirmación-->
+            <form action="./borrarUsuario.php" method="post">
+                <input type="hidden" name="paso" value="2" />
 
-        try {
-            //obtener el id del usuario
-            $consultaObtenerIdUsuario = "SELECT id_usuario FROM Usuarios WHERE nombre_usuario = ?;";
-            $prepararConsultaUsuario = $conectar->prepare($consultaObtenerIdUsuario);
-            $prepararConsultaUsuario->bind_param("s", $_SESSION['nombre_usuario']);
-            $prepararConsultaUsuario->execute();
-            $resultado = $prepararConsultaUsuario->get_result();
-            $idUsuario = $resultado->fetch_assoc()['id_usuario'];
+                <p>¿Seguro que quieres borrar tu cuenta <strong><?php echo htmlspecialchars($nombreUsuario); ?></strong>?</p>
+                <p>Se borrarán también <strong><?php echo $totalJuegos; ?> <?php echo $totalJuegos === 1 ? 'juego' : 'juegos'; ?></strong> de tu lista y sus portadas.</p>
 
-            //obtener los pósters de los juegos asociados al usuario
-            $consultaPosters = "
-            SELECT j.poster 
-            FROM Juegos j
-            INNER JOIN Anade a ON j.id = a.id_juego
-            WHERE a.id_usuario = ?;";
-            $stmtPosters = $conectar->prepare($consultaPosters);
-            $stmtPosters->bind_param("i", $idUsuario);
-            $stmtPosters->execute();
-            $resultPosters = $stmtPosters->get_result();
+                <button type="submit">Sí, quiero borrar mi cuenta</button>
 
-            //eliminar los archivos de los pósters
-            while ($row = $resultPosters->fetch_assoc()) {
-                $rutaPoster = "../img/avatares_juegos/" . $row['poster'];
-                if (file_exists($rutaPoster)) {
-                    unlink($rutaPoster);
-                }
-            }
-            $stmtPosters->close();
+                <section>
+                    <a href="./principal.php">Cancelar</a>
+                </section>
+            </form>
 
+        <?php } else { ?>
+            <!--Paso 3: confirmación final-->
+            <form action="./borrarUsuario.php" method="post">
+                <input type="hidden" name="paso" value="3" />
 
-            //eliminar los registros de la tabla 'Anade' asociados con el usuario
-            $sqlBorrarAnade = "DELETE FROM Anade WHERE id_usuario = ?";
-            $stmt = $conectar->prepare($sqlBorrarAnade);
-            $stmt->bind_param("i", $idUsuario);
-            $stmt->execute();
-            $stmt->close();
+                <div class="aviso-irreversible">
+                    <p><strong>Esta acción es irreversible.</strong></p>
+                    <p>Tu cuenta, tus <?php echo $totalJuegos; ?> <?php echo $totalJuegos === 1 ? 'juego' : 'juegos'; ?> y sus portadas se borrarán para siempre y no se podrán recuperar.</p>
+                </div>
 
-            //eliminar los juegos (en principio esta consulta ya no es necesaria)
-            $sqlBorrarJuegos = "DELETE FROM Juegos WHERE id NOT IN (SELECT id_juego FROM Anade)";
-            $stmt = $conectar->prepare($sqlBorrarJuegos);
-            $stmt->execute();
-            $stmt->close();
+                <button type="submit" class="peligro">Borrar mi cuenta definitivamente</button>
 
-            //eliminar el usuario
-            $sqlBorrarUsuario = "DELETE FROM Usuarios WHERE nombre_usuario = ?";
-            $stmt = $conectar->prepare($sqlBorrarUsuario);
-            $stmt->bind_param("s", $nombre_usuario);
-            $stmt->execute();
-            $stmt->close();
+                <section>
+                    <a href="./principal.php">Cancelar y volver a mi lista</a>
+                </section>
+            </form>
+        <?php } ?>
+    </main>
 
-            //redirigir al index
-            header("Location: ../index.html");
-            exit();
-        } catch (mysqli_sql_exception $e) {
-            echo "<a href='./principal.php'>Volver atrás</a><br/><br/>";
-            //cerrar la conexión
-            $conectar->close();
-            die("Error borrando el usuario: " . $e->getMessage());
-        }
-
-
-    } else {
-        header("Location: https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-        exit();
-    }
-
-    ?>
-
+    <footer>
+        &copy; 2025 Creada por <a href="https://github.com/aloxvim/juegospendientes" target="_blank">@aloxvim</a>.
+    </footer>
 </body>
 
 </html>

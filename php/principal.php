@@ -56,9 +56,8 @@ if (!isset($_SESSION['nombre_usuario'])) {
             </section>
 
             <section>
-                <?php
-                echo "<a href='./borrarUsuario.php?nombre_usuario=" . $_SESSION['nombre_usuario'] . "' id='borrar' onclick='return confirmarEliminacion()'>Borrar cuenta</a>";
-                ?>
+                <!--el borrado pide contraseña y dos confirmaciones (ver borrarUsuario.php)-->
+                <a href="./borrarUsuario.php" id="borrar">Borrar cuenta</a>
             </section>
 
             <section>
