@@ -1,2 +1,0 @@
-**Errores a solucionar**
-
