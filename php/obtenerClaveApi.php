@@ -16,16 +16,16 @@ if (!isset($_SESSION['nombre_usuario'])) {
     exit();
 }
 
+//traer las funciones para leer sql/config.php
+include_once "./instalacion.php";
+
 //comprobar que existe el archivo de configuración
-$configPath = __DIR__ . '/../sql/config.php';
-if (!file_exists($configPath)) {
+$config = cargarConfig();
+if ($config === null) {
     http_response_code(500);
     echo json_encode(['error' => 'No se encuentra el archivo de configuración']);
     exit();
 }
 
-//traer el archivo de configuración
-include_once $configPath;
-
-echo json_encode(['claveApiRawg' => $claveApiRawg ?? '']);
+echo json_encode(['claveApiRawg' => $config['claveApiRawg']]);
 ?>

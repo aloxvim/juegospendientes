@@ -12,15 +12,14 @@
 
     <?php
     //depuración
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
+    // ini_set('display_errors', 1);
+    // ini_set('display_startup_errors', 1);
+    // error_reporting(E_ALL);
 
-    //traer el archivo autoload del phpmailer
-    require '../vendor/autoload.php';
+    //PHPMailer configurado con los datos de sql/config.php
+    include_once "./correo.php";
 
-    //usar el php mailer
-    use PHPMailer\PHPMailer\PHPMailer;
+    //excepción que lanza PHPMailer si falla el envío
     use PHPMailer\PHPMailer\Exception;
 
     //comprobar que se ha pulsado el botón de envío del formulario de reportar un error
@@ -28,15 +27,21 @@
         //asignar los valores introducidos a variables
         $tipoError = $_POST['errorType'];
         $correoUsuario = $_POST['userEmail'];
-        $errorDetallado = $_POST['errorDetails'];
+        $errorDetallado = trim($_POST['errorDetails']);
 
         /* Comprobaciones*/
+
+        //comprobar que el envío de correos está configurado
+        if (!correoConfigurado()) {
+            echo "<a href='../index.html'>Volver atrás</a><br/><br/>";
+            die("<p class='error'>" . MENSAJE_SIN_CORREO . "</p>");
+        }
 
         //comprobar que no hay campos vacíos
         if (empty($tipoError) || empty($correoUsuario) || empty($errorDetallado)) {
             echo "<a href='../index.html'>Volver atrás</a><br/><br/>";
             die("<p class='error'>No puede haber campos vacíos</p>");
-        }//comprobar que el correo cumple con la norma 
+        }//comprobar que el correo cumple con la norma
         elseif (!filter_var($correoUsuario, FILTER_VALIDATE_EMAIL)) {
             echo "<a href='../index.html'>Volver atrás</a><br/><br/>";
             die("<p class='error'>El correo introducido no es válido</p>");
@@ -48,34 +53,24 @@
 
         /* Fin de comprobaciones (por ahora) */
 
-        //configurar PHPMailer
-        $mail = new PHPMailer(true);
         try {
-            // Configurar SMTP
-            $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';  // Servidor SMTP de Gmail
-            $mail->SMTPAuth = true;
-            $mail->Username = 'correo'; // TU correo de Gmail
-            $mail->Password = 'clave'; // Contraseña de la aplicación generada
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = 587;
+            //configurar el correo del reporte
+            $mail = crearCorreo();
+            $mail->addAddress(correoReportes()); // A: el correo que recibe los reportes
+            $mail->addReplyTo($correoUsuario); // Responder: al correo del usuario que reporta
 
-            // Configuración del correo
-            $mail->setFrom($correoUsuario, 'Usuario'); // De: el correo del usuario que reporta
-            $mail->addAddress('correo'); // A: el correo de destino
-            $mail->addReplyTo($correoUsuario); // Opción de responder al correo del usuario
-    
-            // Contenido del correo
+            // Contenido del correo (escapado para que el usuario no pueda meter HTML)
             $mail->isHTML(true);
             $mail->Subject = "Nuevo reporte: $tipoError";
-            $mail->Body = "<p><strong>Correo del usuario:</strong> $correoUsuario</p>
-                      <p><strong>Detalles del error:</strong> $errorDetallado</p>";
+            $mail->Body = "<p><strong>Correo del usuario:</strong> " . htmlspecialchars($correoUsuario) . "</p>
+                      <p><strong>Detalles del error:</strong> " . nl2br(htmlspecialchars($errorDetallado)) . "</p>";
 
             // Enviar el correo
             $mail->send();
-            header("Location: ../index.html");
+            redirigir('../index.html');
         } catch (Exception $e) {
-            echo "<p class='error'>Error al enviar el correo: {$mail->ErrorInfo}</p>";
+            echo "<a href='../index.html'>Volver atrás</a><br/><br/>";
+            echo "<p class='error'>Error al enviar el correo: " . htmlspecialchars($e->getMessage()) . "</p>";
         }
 
 

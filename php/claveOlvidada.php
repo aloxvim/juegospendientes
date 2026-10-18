@@ -5,21 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="../css/errores.css">
-    <title>Document</title>
+    <title>Nueva contraseña</title>
 </head>
 
 <body>
     <?php
     //depuración
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
+    // ini_set('display_errors', 1);
+    // ini_set('display_startup_errors', 1);
+    // error_reporting(E_ALL);
 
-    //traer el archivo autoload del phpmailer
-    require '../vendor/autoload.php';
+    //PHPMailer configurado con los datos de sql/config.php
+    include_once "./correo.php";
 
-    //usar el php mailer
-    use PHPMailer\PHPMailer\PHPMailer;
+    //excepción que lanza PHPMailer si falla el envío
     use PHPMailer\PHPMailer\Exception;
 
     //traer el archivo de conexión
@@ -39,6 +38,12 @@
         $correo = $_POST['email'];
 
         /* Comprobaciones */
+
+        //comprobar que el envío de correos está configurado (antes de tocar la contraseña)
+        if (!correoConfigurado()) {
+            echo "<a href='../html/login.html'>Volver atrás</a><br/><br/>";
+            die("<p class='error'>" . MENSAJE_SIN_CORREO . "</p>");
+        }
 
         //comprobar que el campo no está vacío
         if (empty($correo)) {
@@ -70,50 +75,46 @@
         //generar una nueva contraseña
         $nuevaClave = bin2hex(random_bytes(8));
 
-        //actualizar la contraseña en la base de datos
+        //cambiar la contraseña y mandarla en una transacción:
+        //si el correo no se puede enviar, la contraseña antigua se mantiene
+        $conectar->begin_transaction();
         try {
+            //actualizar la contraseña en la base de datos
             $salt = rand(-1000000, 1000000);
             $nuevoHashedPassword = hash('sha256', $nuevaClave . $salt);
             $sqlActualizarClave = "UPDATE Usuarios SET contrasena = ?, salt = ? WHERE email = ?;";
             $prepararConsulta = $conectar->prepare($sqlActualizarClave); // preparar la consulta
             $prepararConsulta->bind_param("sis", $nuevoHashedPassword, $salt, $correo); // blindar los parámetros
             $prepararConsulta->execute(); // ejecutar la consulta
-        } catch (mysqli_sql_exception $e) {
-            //cerrar la conexión
-            $conectar->close();
-            die("<p class='error'>Error cambiando la contraseña: " . $e->getMessage() . "</p>");
-        }
 
+            //configurar el correo con la nueva contraseña
+            $mail = crearCorreo();
+            $mail->addAddress($correo); // A: el correo del usuario
 
-        //configurar PHPMailer y mandar la nueva contraseña
-        $mail = new PHPMailer(true);
-        try {
-            // Configurar SMTP
-            $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';  // Servidor SMTP de Gmail
-            $mail->SMTPAuth = true;
-            $mail->Username = 'correo'; // TU correo de Gmail
-            $mail->Password = 'clave'; // Contraseña de la aplicación generada
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = 587;
-
-            // Configuración del correo
-            $mail->setFrom('correo', 'usuario'); // De: el correo del usuario que genera la contraseña
-            $mail->addAddress($correo); // A: el correo de destino
-            //$mail->addReplyTo($correoUsuario); // Opción de responder al correo del usuario
-    
             // Contenido del correo
+            $correoHtml = htmlspecialchars($correo);
             $mail->isHTML(true);
             $mail->Subject = "Clave nueva generada.";
-            $mail->Body = "<p>¡Hola $correo! Se ha recibido una solicitud para cambiar tu clave. ¡No te preocupes!</p>
+            $mail->Body = "<p>¡Hola $correoHtml! Se ha recibido una solicitud para cambiar tu clave. ¡No te preocupes!</p>
             <p>Tu nueva clave es: <strong>$nuevaClave</strong></p>
             <p>Puedes cambiarla siempre que quieras desde el apartado de modificar tu cuenta</p>";
 
-            // Enviar el correo
+            // Enviar el correo y, si ha ido bien, guardar la nueva contraseña
             $mail->send();
-            header("Location: ../index.html");
+            $conectar->commit();
+            $conectar->close();
+
+            redirigir('../index.html');
+        } catch (mysqli_sql_exception $e) {
+            $conectar->rollback();
+            $conectar->close();
+            echo "<a href='../html/login.html'>Volver atrás</a><br/><br/>";
+            die("<p class='error'>Error cambiando la contraseña: " . $e->getMessage() . "</p>");
         } catch (Exception $e) {
-            echo "<p class='error'>Error al enviar la nueva contraseña: {$mail->ErrorInfo}</p>";
+            $conectar->rollback();
+            $conectar->close();
+            echo "<a href='../html/login.html'>Volver atrás</a><br/><br/>";
+            die("<p class='error'>Error al enviar la nueva contraseña (tu contraseña no ha cambiado): " . htmlspecialchars($e->getMessage()) . "</p>");
         }
     }
     ?>

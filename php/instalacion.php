@@ -30,6 +30,13 @@ function cargarConfig() {
         'password' => $password ?? '',
         'nombreBaseDatos' => $nombreBaseDatos ?? '',
         'puerto' => $puerto ?? 3306,
+        'claveApiRawg' => $claveApiRawg ?? '',
+        'smtpHost' => $smtpHost ?? '',
+        'smtpPuerto' => $smtpPuerto ?? 587,
+        'smtpUsuario' => $smtpUsuario ?? '',
+        'smtpClave' => $smtpClave ?? '',
+        'smtpNombreRemitente' => $smtpNombreRemitente ?? 'Juegos Pendientes',
+        'correoReportes' => $correoReportes ?? '',
     ];
 }
 
