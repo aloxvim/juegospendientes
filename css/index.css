@@ -12,6 +12,22 @@
     background: transparent;
 }
 
+/* aviso de instalación (oculto salvo que falte configuración o servidor) */
+.aviso-instalacion {
+    align-self: center;
+    width: calc(100% - 32px);
+    max-width: 980px;
+    margin-top: 1.5rem;
+}
+
+.aviso-instalacion[hidden] {
+    display: none;
+}
+
+.aviso-instalacion code {
+    color: var(--gx-rojo);
+}
+
 main {
     flex: 1;
     width: calc(100% - 32px);

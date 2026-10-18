@@ -1,38 +1,32 @@
-<?php 
+<?php
 
     //depuración para mostrar errores
     // error_reporting(E_ALL);
-    // ini_set('display_errors', 1);    
+    // ini_set('display_errors', 1);
 
-    //comprobar que existe el archivo de configuración
-    $configPath = __DIR__ . '/../sql/config.php';
-    if (!file_exists($configPath)) {
-        echo "<p><strong>No se encuentra el archivo de configuración</strong><p>";
-    }
+    //funciones para comprobar la configuración e instalación
+    include_once __DIR__ . '/instalacion.php';
 
-    //traer el archivo de configuración
-    include_once $configPath;
     function getConexion() {
 
-        //variables con los datos
-        global $host, $usuario, $password, $nombreBaseDatos, $puerto;
+        //comprobar que sql/config.php existe y está relleno
+        $config = cargarConfig();
+        if (!configRellena($config)) {
+            mostrarErrorInstalacion(MENSAJE_SIN_CONFIG);
+        }
 
         //intentar la conexión
-        $conexion = new mysqli($host, $usuario, $password, $nombreBaseDatos, $puerto);
+        try {
+            return new mysqli($config['host'], $config['usuario'], $config['password'], $config['nombreBaseDatos'], (int) $config['puerto']);
+        } catch (mysqli_sql_exception $e) {
+            //1049 = la base de datos no existe -> pantalla de instalación
+            if ($e->getCode() == 1049) {
+                redirigir('./autoinstall.php');
+            }
 
-        if ($conexion->connect_error) {
-            echo "<p>Error en la conexión: {$conexion->connect_error}</p>";
-        } /*else{
-            echo "<p>Conexión establecida</p>";
-        }*/
-
-        return $conexion;
+            //cualquier otro error: servidor caído, credenciales incorrectas...
+            mostrarErrorInstalacion(MENSAJE_SIN_SERVIDOR);
+        }
     }
-
-    //llamar al método que comprueba la conexión
-    getConexion();
-
-    //enlace para volver a index
-    //echo "<a href= './index.php'>Volver a index</a>";
 
 ?>

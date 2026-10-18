@@ -1,0 +1,59 @@
+/* Pantalla de instalación (php/autoinstall.php) */
+@import url("./gx-theme.css");
+
+main {
+    max-width: 520px;
+}
+
+/* nombre de la aplicación destacado */
+.nombre-app {
+    margin-bottom: 1.25rem;
+    font-family: var(--fuente-titulo);
+    font-size: clamp(1.6rem, 6vw, 2.2rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-align: center;
+    color: var(--gx-rojo);
+    text-shadow: 0 0 18px var(--gx-rojo-brillo);
+}
+
+main p {
+    color: var(--texto-suave);
+}
+
+main .error {
+    margin-bottom: 1rem;
+    color: var(--texto);
+}
+
+code {
+    padding: 0.1rem 0.35rem;
+    font-size: 0.9em;
+    color: var(--texto);
+    background: var(--fondo);
+    border: 1px solid var(--borde);
+}
+
+/* enlace con aspecto de botón ("Volver a comprobar") */
+.boton {
+    display: block;
+    margin-top: 1rem;
+    padding: 0.85rem 1.25rem;
+    font-family: var(--fuente-titulo);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-align: center;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--gx-rojo-fuerte);
+    clip-path: var(--chaflan);
+}
+
+.boton:hover {
+    color: #fff;
+    background: var(--gx-rojo);
+}
+
+.boton:focus-visible {
+    clip-path: none;
+}
