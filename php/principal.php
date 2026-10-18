@@ -61,9 +61,7 @@ if (!isset($_SESSION['nombre_usuario'])) {
             </section>
 
             <section>
-                <?php
-                echo "<a href='./modificarUsuario.php?nombre_usuario=" . $_SESSION['nombre_usuario'] . "' id='modificar'>Modificar cuenta</a>";
-                ?>
+                <a href="./modificarUsuario.php" id="modificar">Modificar cuenta</a>
             </section>
         </nav>
     </header>

@@ -15,6 +15,9 @@
 //traer el archivo de conexión
 include_once "./conectar.php";
 
+//funciones comunes de la cuenta (claveCorrecta)
+include_once "./usuarios.php";
+
 //comprobar que existe una sesión
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
@@ -43,22 +46,6 @@ function pasoSuperado() {
 //guardar en la sesión el paso superado
 function marcarPaso($paso) {
     $_SESSION['borrarCuenta'] = ['paso' => $paso, 'expira' => time() + TIEMPO_BORRADO];
-}
-
-//comprobar la contraseña del usuario
-function claveCorrecta($conectar, $nombreUsuario, $clave) {
-    $consulta = "SELECT contrasena, salt FROM Usuarios WHERE nombre_usuario = ?;";
-    $prepararConsulta = $conectar->prepare($consulta);
-    $prepararConsulta->bind_param("s", $nombreUsuario);
-    $prepararConsulta->execute();
-    $usuario = $prepararConsulta->get_result()->fetch_assoc();
-
-    if (!$usuario) {
-        return false;
-    }
-
-    $hashedPassword = hash('sha256', $clave . $usuario['salt']);
-    return hash_equals($usuario['contrasena'], $hashedPassword);
 }
 
 //contar los juegos del usuario (para avisar de lo que se va a perder)

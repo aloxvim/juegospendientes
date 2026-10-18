@@ -1,9 +1,163 @@
-/* Modificar datos de la cuenta */
+/*
+ * Mi cuenta (php/modificarUsuario.php).
+ * Escritorio: perfil a la izquierda y las tres tarjetas a la derecha.
+ * Móvil: perfil arriba y tarjetas debajo.
+ */
 @import url("./gx-theme.css");
 
-/* los mensajes que imprime modificarUsuario.php salen después del pie */
-body > p {
-    width: 100%;
-    max-width: 440px;
+/* ===== Distribución ===== */
+main {
+    max-width: 980px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: minmax(220px, 300px) 1fr;
+    align-items: start;
+    gap: clamp(1rem, 3vw, 1.75rem);
+    /* main solo coloca las columnas: el aspecto de tarjeta lo llevan sus hijos */
+    background: none;
+    border: 0;
+    box-shadow: none;
+}
+
+main::before,
+main::after {
+    content: none;
+}
+
+/* tarjeta base (perfil y formularios) con esquinas tipo HUD como el tema */
+.perfil,
+.tarjeta {
+    position: relative;
+    padding: clamp(1.25rem, 3vw, 1.75rem);
+    background: linear-gradient(160deg, var(--panel-2), var(--panel) 45%);
+    border: 1px solid var(--borde);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.perfil::before,
+.tarjeta::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: 18px;
+    height: 18px;
+    border-top: 2px solid var(--gx-rojo);
+    border-left: 2px solid var(--gx-rojo);
+    pointer-events: none;
+}
+
+/* ===== Perfil (izquierda) ===== */
+.perfil {
+    position: sticky;
+    top: 1.5rem;
+    text-align: center;
+}
+
+.perfil-etiqueta {
     margin: 0;
+    font-family: var(--fuente-titulo);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+}
+
+.perfil-nombre {
+    margin: 0.25rem 0;
+    font-family: var(--fuente-titulo);
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    overflow-wrap: anywhere;
+    color: var(--gx-rojo);
+}
+
+.perfil-correo {
+    margin: 0;
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+    color: var(--texto-suave);
+}
+
+/* ===== Volver a la lista (al fondo, ocupando las dos columnas) ===== */
+.volver {
+    grid-column: 1 / -1;
+    justify-self: center;
+    margin-top: 0.5rem;
+    padding: 0.7rem 1.5rem;
+    font-family: var(--fuente-titulo);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--texto);
+    border: 1px solid var(--borde);
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.volver:hover {
+    color: #fff;
+    text-shadow: none;
+    border-color: var(--gx-rojo);
+    background: var(--gx-rojo-suave);
+}
+
+/* ===== Tarjetas (derecha) ===== */
+.tarjetas {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1.5rem, 3vw, 2rem);
+}
+
+.tarjeta h2 {
+    margin-bottom: 1rem;
+    font-size: 1.15rem;
+    text-align: left;
+}
+
+/* el primer hijo del form es el input oculto: quitar el margen a la primera etiqueta */
+.tarjeta form label:first-of-type {
+    margin-top: 0;
+}
+
+.tarjeta button {
+    align-self: flex-start;
+    margin-top: 1rem;
+}
+
+/* mensajes de resultado dentro de cada tarjeta */
+.tarjeta .error,
+.tarjeta .exito {
+    max-width: none;
+    margin: 0 0 1rem;
+}
+
+.exito {
+    padding: 0.9rem 1rem;
+    color: var(--texto);
+    background: rgba(61, 220, 151, 0.1);
+    border: 1px solid rgba(61, 220, 151, 0.4);
+    border-left: 4px solid var(--ok);
+}
+
+/* ===== Móvil: una sola columna ===== */
+@media (max-width: 720px) {
+    main {
+        grid-template-columns: 1fr;
+    }
+
+    .perfil {
+        position: static;
+    }
+
+    .tarjeta button {
+        align-self: stretch;
+    }
+
+    .volver {
+        justify-self: stretch;
+        text-align: center;
+    }
 }
