@@ -29,6 +29,22 @@ header > nav #borrar:hover {
     background: var(--gx-rojo-fuerte);
 }
 
+/* cerrar sesión: amarillo al pasar el ratón (texto oscuro para que se lea) */
+header > nav #cerrarSesion:hover {
+    color: var(--fondo);
+    background: #ffc93c;
+    border-color: #ffc93c;
+    box-shadow: 0 0 14px rgba(255, 201, 60, 0.45);
+}
+
+/* modificar cuenta: azul al pasar el ratón */
+header > nav #modificar:hover {
+    color: #fff;
+    background: #1f6fe0;
+    border-color: #1f6fe0;
+    box-shadow: 0 0 14px rgba(31, 111, 224, 0.45);
+}
+
 /* ===== Rejilla de juegos ===== */
 main {
     flex: 1;

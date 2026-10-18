@@ -19,6 +19,17 @@ body > .error {
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(250, 30, 78, 0.12);
 }
 
+/* mensaje de que todo ha ido bien (verde en vez de rojo) */
+body > p.exito {
+    border-color: rgba(61, 220, 151, 0.4);
+    border-left-color: var(--ok);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(61, 220, 151, 0.12);
+}
+
+body > p.exito strong {
+    color: var(--ok);
+}
+
 body > a {
     order: 2;
     padding: 0.7rem 1.5rem;

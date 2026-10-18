@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="../css/errores.css" />
-    <title>Error</title>
+    <title>Reportar un error</title>
 </head>
 
 <body>
@@ -67,7 +67,11 @@
 
             // Enviar el correo
             $mail->send();
-            redirigir('../index.html');
+
+            //avisar de que se ha enviado
+            echo "<a href='../index.html'>Volver al inicio</a>";
+            echo "<p class='exito'><strong>¡Reporte enviado!</strong><br/>Gracias por avisar. Si hace falta más información te responderemos a "
+                . "<strong>" . htmlspecialchars($correoUsuario) . "</strong>.</p>";
         } catch (Exception $e) {
             echo "<a href='../index.html'>Volver atrás</a><br/><br/>";
             echo "<p class='error'>Error al enviar el correo: " . htmlspecialchars($e->getMessage()) . "</p>";

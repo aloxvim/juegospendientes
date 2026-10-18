@@ -1,62 +1,115 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 
 <head>
   <meta charset="utf-8">
-  <title>Page Not Found</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    * {
-      line-height: 1.2;
-      margin: 0;
-    }
+  <title>Página no encontrada</title>
 
-    html {
-      color: #888;
-      display: table;
-      font-family: sans-serif;
-      height: 100%;
-      text-align: center;
-      width: 100%;
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Exo+2:wght@400;500&display=swap">
+
+  <!--
+    Estilos dentro del archivo (y no con css/gx-theme.css) porque el servidor puede
+    mostrar esta página desde cualquier ruta y un enlace relativo al CSS se rompería.
+    Los colores son los mismos que las variables del tema.
+  -->
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
     }
 
     body {
-      display: table-cell;
-      vertical-align: middle;
-      margin: 2em auto;
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 2rem 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-family: "Exo 2", "Segoe UI", system-ui, sans-serif;
+      color: #ece4ea;
+      background-color: #0d0a0e;
+      background-image:
+        radial-gradient(ellipse 60% 50% at 0% 0%, rgba(250, 30, 78, 0.18), transparent 60%),
+        radial-gradient(ellipse 50% 40% at 100% 100%, rgba(250, 30, 78, 0.12), transparent 60%),
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: auto, auto, 32px 32px, 32px 32px;
+    }
+
+    .codigo {
+      margin: 0;
+      font-family: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+      font-size: clamp(5rem, 22vw, 9rem);
+      font-weight: 700;
+      line-height: 1;
+      color: #fa1e4e;
+      text-shadow: 0 0 30px rgba(250, 30, 78, 0.45);
     }
 
     h1 {
-      color: #555;
-      font-size: 2em;
-      font-weight: 400;
+      margin: 0.5rem 0 0;
+      font-family: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+      font-size: clamp(1.3rem, 4vw, 1.8rem);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    h1::after {
+      content: "";
+      display: block;
+      width: 56px;
+      height: 3px;
+      margin: 0.6rem auto 0;
+      background: #fa1e4e;
+      box-shadow: 0 0 12px rgba(250, 30, 78, 0.45);
     }
 
     p {
-      margin: 0 auto;
-      width: 280px;
+      max-width: 34ch;
+      margin: 1.25rem 0 2rem;
+      color: #a8969f;
     }
 
-    @media only screen and (max-width: 280px) {
+    button {
+      padding: 0.85rem 1.5rem;
+      font-family: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #fff;
+      background: #d4123a;
+      border: 0;
+      cursor: pointer;
+      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+      transition: background 0.2s ease;
+    }
 
-      body,
-      p {
-        width: 95%;
-      }
+    button:hover {
+      background: #fa1e4e;
+    }
 
-      h1 {
-        font-size: 1.5em;
-        margin: 0 0 0.3em;
-      }
-
+    button:focus-visible {
+      clip-path: none;
+      outline: 2px solid #fa1e4e;
+      outline-offset: 2px;
     }
   </style>
 </head>
 
 <body>
-  <h1>Page Not Found</h1>
-  <p>Sorry, but the page you were trying to view does not exist.</p>
+  <p class="codigo">404</p>
+  <h1>Página no encontrada</h1>
+  <p>Este nivel no existe. Puede que el enlace esté mal escrito o que la página se haya movido.</p>
+
+  <!--Volver atrás en el historial: funciona esté donde esté instalada la app-->
+  <button type="button" onclick="history.back()">Volver atrás</button>
 </body>
 
 </html>
-<!-- IE needs 512+ bytes: https://docs.microsoft.com/archive/blogs/ieinternals/friendly-http-error-pages -->

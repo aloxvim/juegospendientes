@@ -16,6 +16,6 @@ fetch('./php/comprobarInstalacion.php')
         }
     })
     .catch(error => {
-        // sin PHP (por ejemplo con el servidor de webpack) no se puede comprobar
+        // sin PHP (por ejemplo abriendo el HTML directamente) no se puede comprobar
         console.error('No se pudo comprobar la instalación:', error);
     });

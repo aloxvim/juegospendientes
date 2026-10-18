@@ -78,27 +78,14 @@ try {
             break;
     }
     
-    // Crear un nombre de archivo único y limpio
+    // Crear un nombre de archivo limpio (solo es el nombre que verá el <input type="file">)
     $nombreLimpio = preg_replace('/[^a-z0-9]/i', '_', $nombreJuego);
     $nombreLimpio = substr($nombreLimpio, 0, 50); // Limitar longitud
-    $nombreArchivo = uniqid('poster_') . '_' . $nombreLimpio . '.' . $extension;
-    
-    // Directorio temporal
-    $directorioTemp = '../img/temp/';
-    
-    // Crear el directorio si no existe
-    if (!is_dir($directorioTemp)) {
-        if (!mkdir($directorioTemp, 0755, true)) {
-            throw new Exception('No se pudo crear el directorio temporal');
-        }
-    }
-    
-    // Guardar temporalmente la imagen
-    $rutaTemp = $directorioTemp . $nombreArchivo;
-    if (file_put_contents($rutaTemp, $imagenData) === false) {
-        throw new Exception('No se pudo guardar la imagen temporalmente');
-    }
-    
+    $nombreArchivo = 'poster_' . $nombreLimpio . '.' . $extension;
+
+    // La imagen no se guarda en el servidor: se manda al navegador en base64,
+    // el JS la mete en el formulario y insertarJuego.php la guarda al enviarlo
+
     // Convertir la imagen a base64 para enviarla al cliente
     $imagenBase64 = base64_encode($imagenData);
     

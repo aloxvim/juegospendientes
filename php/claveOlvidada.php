@@ -104,7 +104,10 @@
             $conectar->commit();
             $conectar->close();
 
-            redirigir('../index.html');
+            //avisar de que se ha enviado
+            echo "<a href='../html/login.html'>Ir a iniciar sesión</a>";
+            echo "<p class='exito'><strong>¡Correo enviado!</strong><br/>Te hemos mandado una nueva contraseña a <strong>$correoHtml</strong>. "
+                . "Si no lo ves en unos minutos, revisa la carpeta de spam.</p>";
         } catch (mysqli_sql_exception $e) {
             $conectar->rollback();
             $conectar->close();

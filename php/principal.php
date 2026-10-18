@@ -52,7 +52,7 @@ if (!isset($_SESSION['nombre_usuario'])) {
             </section>
 
             <section>
-                <a href="./logout.php">Cerrar sesión</a>
+                <a href="./logout.php" id="cerrarSesion">Cerrar sesión</a>
             </section>
 
             <section>
